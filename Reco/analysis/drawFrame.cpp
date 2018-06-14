@@ -27,8 +27,10 @@ int main( int argc, char* argv[] ) {
   system( "mkdir -p frames" );
 
   MPDrawStuff::setStyle();
-  //gStyle->SetPalette(kTemperatureMap);
-
+  gStyle->SetPadTopMargin(0.);
+  gStyle->SetPadBottomMargin(0.);//0.13);
+  gStyle->SetPadLeftMargin(0.);//0.16);
+  gStyle->SetPadRightMargin(0.);//0.02);
 
   std::string frameFile_full(argv[1]);
   std::string frameFile = frameFile_full.substr(0, frameFile_full.find("."));
@@ -42,6 +44,8 @@ int main( int argc, char* argv[] ) {
   h2_frame->GetXaxis()->SetNdivisions(0);
   h2_frame->GetYaxis()->SetNdivisions(0);
   h2_frame->GetZaxis()->SetRangeUser(0., 2.);
+  h2_frame->SetXTitle("X");
+  h2_frame->SetYTitle("Y");
 
   for( unsigned ix=1; ix<257; ++ix )
     for( unsigned iy=1; iy<257; ++iy )
@@ -50,7 +54,7 @@ int main( int argc, char* argv[] ) {
   for( unsigned i=0; i<hits.size(); ++i )
     h2_frame->SetBinContent( hits[i].x(), hits[i].y(), hits[i].c() );
 
-  h2_frame->Draw("col z");
+  h2_frame->Draw("col");
 
   c1->SaveAs( Form("frames/%s.pdf", frameFile.c_str()) );
   c1->SaveAs( Form("frames/%s.eps", frameFile.c_str()) );
