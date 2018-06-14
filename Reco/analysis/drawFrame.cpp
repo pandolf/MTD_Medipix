@@ -1,4 +1,5 @@
 #include "../interface/MPHit.h"
+#include "../interface/MPCluster.h"
 #include "../interface/MPDrawStuff.h"
 
 #include <iostream>
@@ -9,6 +10,7 @@
 #include "TH2D.h"
 #include "TColor.h"
 #include "TStyle.h"
+#include "TEllipse.h"
 
 
 
@@ -58,6 +60,20 @@ int main( int argc, char* argv[] ) {
 
   c1->SaveAs( Form("frames/%s.pdf", frameFile.c_str()) );
   c1->SaveAs( Form("frames/%s.eps", frameFile.c_str()) );
+
+
+  std::vector<MPCluster> clusters = MPCluster::makeClustersNN(hits);
+
+  for( unsigned i=0; i<clusters.size(); ++i ) {
+    TEllipse* ell = new TEllipse( clusters[i].x(), clusters[i].y(), clusters[i].width(), clusters[i].width() );
+    ell->SetLineColor(kRed);
+    ell->SetLineWidth(2);
+    ell->Draw("same");
+  }
+
+  c1->SaveAs( Form("frames/%s_withClust.pdf", frameFile.c_str()) );
+  c1->SaveAs( Form("frames/%s_withClust.eps", frameFile.c_str()) );
+
 
   return 0;
 
