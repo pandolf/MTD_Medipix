@@ -13,6 +13,12 @@ ROOTFLAG = `${ROOTSYS}/bin/root-config --cflags --libs`
 EXTRALIBS := -L$(ROOTSYS)/lib -lHtml -lMathCore -lGenVector -lMinuit -lEG  -lPhysics -lTreePlayer -lRooFitCore -lRooFit #-L$(ROOFIT_LIBDIR)/ 
 
 
+drawFrame: drawFrame.cpp MPHit.o MPDrawStuff.o
+	$(CC) -Wall $(INCLUDES) -o drawFrame drawFrame.cpp MPHit.o MPDrawStuff.o $(ROOTFLAG) $(EXTRALIBS)
+
 MPHit.o: ../src/MPHit.cc
 	$(CC) -Wall $(INCLUDES) -c ../src/MPHit.cc $(ROOTFLAG) 
+
+MPDrawStuff.o: ../src/MPDrawStuff.cc
+	$(CC) -Wall $(INCLUDES) -c ../src/MPDrawStuff.cc $(ROOTFLAG) 
 
