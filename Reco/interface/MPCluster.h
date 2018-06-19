@@ -16,12 +16,22 @@ class MPCluster {
   MPCluster();
   ~MPCluster() {};
 
+  void add_hit( const MPHit& hit );
+
   float x() const;
   float y() const;
 
+  bool isAdjacent( const MPHit& hit ) const;
+
   int nhits() const { return hits_.size(); };
 
-  float width() const;
+  int width() const;
+  int widthx() const;
+  int widthy() const;
+
+  float rms() const;
+
+  bool isGood() const;
 
   float dist( const MPCluster& other_cluster ) const;
 

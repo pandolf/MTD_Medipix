@@ -1,12 +1,15 @@
 #ifndef MPHIT_H
 #define MPHIT_H
 
+#include <vector>
+
 
 class MPHit {
 
  public:
 
   MPHit( int x, int y, int c=1 );
+  MPHit( const MPHit& rhs );
 
   ~MPHit() {};
 
@@ -25,6 +28,7 @@ class MPHit {
 
   float deltaR( const MPHit& otherhit ) const;
 
+  static std::vector<MPHit> readFrameFile( const std::string& frameFile );
 
  private:
 

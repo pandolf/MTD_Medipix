@@ -16,6 +16,14 @@ MPCluster::MPCluster() {
 }
 
 
+void MPCluster::add_hit( const MPHit& hit ) {
+
+  MPHit newhit(hit);
+  this->hits_.push_back(newhit);
+
+}
+
+
 float MPCluster::x() const {
 
   float num(0.), denom(0.);
@@ -48,7 +56,27 @@ float MPCluster::y() const {
 }
 
 
-float MPCluster::width() const {
+bool MPCluster::isAdjacent( const MPHit& hit ) const {
+
+  bool isAdj = false;
+
+  for( unsigned i=0; i<this->hits_.size(); ++i ) {
+
+    if( hit.isAdjacent( this->hits_[i] ) ) {
+  
+      isAdj = true;
+      break;
+
+    } // if
+
+  } // for 
+
+  return isAdj;
+
+}
+
+
+float MPCluster::rms() const {
 
 
   float xm = this->x();
@@ -71,9 +99,57 @@ float MPCluster::width() const {
   var_x /= sumW;
   var_y /= sumW;
 
-  float width = std::sqrt( var_x + var_y );
+  float rms = std::sqrt( var_x + var_y );
   
-  return width;
+  return rms;
+
+}
+
+
+int MPCluster::widthx() const {
+
+  int max_x = -1;
+  int min_x = 9999;
+
+  for( unsigned i=0; i<this->hits().size(); ++i ) {
+
+    if( hits()[i].x() > max_x ) max_x = hits()[i].x();
+    if( hits()[i].x() < min_x ) min_x = hits()[i].x();
+
+  }
+
+  return (max_x-min_x);
+
+}
+
+
+int MPCluster::widthy() const {
+
+  int max_y = -1;
+  int min_y = 9999;
+
+  for( unsigned i=0; i<this->hits().size(); ++i ) {
+
+    if( hits()[i].y() > max_y ) max_y = hits()[i].y();
+    if( hits()[i].y() < min_y ) min_y = hits()[i].y();
+
+  }
+
+  return (max_y-min_y);
+
+}
+
+
+int MPCluster::width() const {
+
+  return std::max( this->widthx(), this->widthy() );
+
+}
+
+
+bool MPCluster::isGood() const {
+
+  return ( this->width()<=2 );
 
 }
 
@@ -92,9 +168,45 @@ float MPCluster::dist( const MPCluster& other_cluster ) const {
 }
 
 
+
+
 std::vector<MPCluster> MPCluster::makeClustersNN( const std::vector<MPHit>& hits ) {
 
   std::vector<MPCluster> clusters;
+
+  std::vector<MPHit> hits_copy(hits);
+
+  
+  std::vector<MPHit>::iterator i_hit = hits_copy.begin();
+
+  while( hits_copy.size()>0 ) {
+
+    MPCluster this_cluster;
+
+    this_cluster.add_hit( *i_hit ); // the seed
+    hits_copy.erase( i_hit ); // erase takes care of moving the pointer fwd so no need for ++
+
+    std::vector<MPHit>::iterator j_hit = hits_copy.begin();
+
+    while( j_hit != hits_copy.end() ) { // add all adjacent hits to the cluster
+
+      if( this_cluster.isAdjacent(*j_hit) ) {
+    
+        this_cluster.add_hit(*j_hit);
+        hits_copy.erase(j_hit); // erase takes care of moving the pointer fwd so no need for ++
+
+      } else {
+
+        j_hit++;
+    
+      }
+
+    } // while
+
+    clusters.push_back(this_cluster);
+
+  }  // while i
+
   return clusters;
 
 }

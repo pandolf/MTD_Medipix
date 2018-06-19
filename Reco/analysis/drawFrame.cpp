@@ -3,7 +3,6 @@
 #include "../interface/MPDrawStuff.h"
 
 #include <iostream>
-#include <fstream>
 #include <string>
 
 #include "TCanvas.h"
@@ -13,8 +12,6 @@
 #include "TEllipse.h"
 
 
-
-std::vector<MPHit> readFrame( const std::string& frameFile );
 
 
 
@@ -30,14 +27,21 @@ int main( int argc, char* argv[] ) {
 
   MPDrawStuff::setStyle();
   gStyle->SetPadTopMargin(0.);
-  gStyle->SetPadBottomMargin(0.);//0.13);
-  gStyle->SetPadLeftMargin(0.);//0.16);
-  gStyle->SetPadRightMargin(0.);//0.02);
+  gStyle->SetPadBottomMargin(0.);
+  gStyle->SetPadLeftMargin(0.);
+  gStyle->SetPadRightMargin(0.);
+
+
+  MPDrawStuff::setPalette( "pixelman" );
+  MPDrawStuff::setPalette( "clusterStandard" );
 
   std::string frameFile_full(argv[1]);
   std::string frameFile = frameFile_full.substr(0, frameFile_full.find("."));
+  if( frameFile.size()==frameFile_full.size() ) {
+    frameFile_full += ".txt";
+  }
 
-  std::vector<MPHit> hits = readFrame(frameFile_full);
+  std::vector<MPHit> hits = MPHit::readFrameFile(frameFile_full);
 
   TCanvas* c1 = new TCanvas( "c1", "", 600, 600 );
   c1->cd();
@@ -64,11 +68,35 @@ int main( int argc, char* argv[] ) {
 
   std::vector<MPCluster> clusters = MPCluster::makeClustersNN(hits);
 
+  std::cout << "found these clusters:" << std::endl;
   for( unsigned i=0; i<clusters.size(); ++i ) {
-    TEllipse* ell = new TEllipse( clusters[i].x(), clusters[i].y(), clusters[i].width(), clusters[i].width() );
-    ell->SetLineColor(kRed);
-    ell->SetLineWidth(2);
+
+    std::cout << "cluster " << i << "    width=" << clusters[i].width() << std::endl;
+
+    for( unsigned ihit=0; ihit<clusters[i].hits().size(); ++ihit ) 
+
+      std::cout << "  hit " << ihit << "  x: " << clusters[i].hits()[ihit].x() << "  y: " << clusters[i].hits()[ihit].y() << std::endl;
+
+  }
+
+
+
+  for( unsigned i=0; i<clusters.size(); ++i ) {
+
+    float ell_r = clusters[i].width()+1;
+    //ell_r *= 5.; // for visibility
+
+    TEllipse* ell = new TEllipse( clusters[i].x(), clusters[i].y(), ell_r, ell_r );
+    if( clusters[i].isGood() ) {
+      ell->SetLineColor(kGreen);
+      ell->SetLineWidth(2);
+    } else {
+      ell->SetLineColor(kRed);
+      ell->SetLineWidth(1);
+    }
+    ell->SetFillStyle(0);
     ell->Draw("same");
+
   }
 
   c1->SaveAs( Form("frames/%s_withClust.pdf", frameFile.c_str()) );
@@ -80,23 +108,3 @@ int main( int argc, char* argv[] ) {
 }
 
 
-
-std::vector<MPHit> readFrame( const std::string& frameFile ) {
-
-  std::vector<MPHit> hits;
-
-  std::ifstream ifs(frameFile);
-
-  while( ifs.good() ) {
-
-    int x, y, c(0);
-    ifs >> x >> y >> c;
-
-    if( c>0 ) 
-      hits.push_back(MPHit(x,y,c));
-
-  }
-
-  return hits;
-
-}
