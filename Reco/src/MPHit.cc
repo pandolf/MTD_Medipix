@@ -28,7 +28,7 @@ int MPHit::deltay( const MPHit& otherhit ) const {
 
 bool MPHit::isAdjacent( const MPHit& otherhit ) const {
 
-  return ( (fabs(this->deltax(otherhit))<=1) || (fabs(this->deltay(otherhit))<=1) );
+  return ( (fabs(this->deltax(otherhit))<=1) && (fabs(this->deltay(otherhit))<=1) );
 
 }
 
